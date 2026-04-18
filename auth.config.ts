@@ -13,7 +13,11 @@ export default {
     }),
   ],
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  secret:
+    process.env.AUTH_SECRET ??
+    (process.env.NODE_ENV === "production"
+      ? undefined
+      : "local-dev-placeholder-not-for-production"),
   pages: {
     signIn: "/signin",
   },
