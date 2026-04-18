@@ -23,7 +23,12 @@
 ## Verification performed
 
 - `npm run ensure:build` (exit 0).
+- `curl` to `/api/guide/knowledge/health` without a session returned **401**.
 - Manual steps documented in README (401 curl, grep, Azure stub with `KNOWLEDGE_PROVIDER=azure`).
+
+## Follow-up commit
+
+- **AUTH_SECRET**: Dev server required a secret for `/api/auth/session`. Added a non-production fallback when `NODE_ENV` is not `production` so `npm run dev` works without `.env.local`; production must still set `AUTH_SECRET`.
 
 ## Spec clarifications discovered
 
