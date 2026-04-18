@@ -11,6 +11,7 @@ export default auth((req) => {
   if (req.auth?.user) {
     return NextResponse.next();
   }
+  // APIs return 401 JSON; pages redirect to /signin
   if (path.startsWith("/api/")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

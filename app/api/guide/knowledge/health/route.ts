@@ -1,4 +1,7 @@
-import { getKnowledgeProvider } from "@/lib/knowledge";
+import {
+  AZURE_KNOWLEDGE_STUB_MESSAGE,
+  getKnowledgeProvider,
+} from "@/lib/knowledge";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +19,8 @@ export async function GET() {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ ok: false, detail: message }, { status: 500 });
+    const status =
+      message === AZURE_KNOWLEDGE_STUB_MESSAGE ? 501 : 500;
+    return NextResponse.json({ ok: false, detail: message }, { status });
   }
 }
