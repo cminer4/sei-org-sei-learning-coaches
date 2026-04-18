@@ -42,7 +42,21 @@ Details: [docs/NEXTJS-DEV-BUILD-SETUP.md](docs/NEXTJS-DEV-BUILD-SETUP.md).
 
 ## Environment
 
-When the Assessment flows are ported, you will need variables such as `ASSESSMENT_COACH_ID` and `ELEVENLABS_ASSESSMENT_AGENT_ID`. Document concrete keys next to the first implementation PR.
+Copy `.env.example` to `.env.local` and fill values. For local builds without a real Entra app registration, placeholders are acceptable (see [specs/features/SEI-50-auth-knowledge-provider.md](specs/features/SEI-50-auth-knowledge-provider.md)):
+
+- `AUTH_SECRET`, `AUTH_URL`
+- `AZURE_AD_CLIENT_ID`, `AZURE_AD_TENANT_ID`, `AZURE_AD_CLIENT_SECRET` (placeholders until Antonio / Katie provide real app registration)
+- `KNOWLEDGE_PROVIDER` (`supabase` default, or `azure` for the throwing stub)
+- Supabase URL and keys when using `KNOWLEDGE_PROVIDER=supabase`
+
+When the Assessment flows are ported, you will also need variables such as `ASSESSMENT_COACH_ID` and `ELEVENLABS_ASSESSMENT_AGENT_ID`.
+
+### SEI-50 manual verification (no automated test suite)
+
+1. `npm run ensure:build` passes.
+2. **401**: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/guide/knowledge/health` should return `401` when you are not signed in (start `npm run dev` first).
+3. **Grep**: `app/` must not import `@supabase/supabase-js` for knowledge; only `lib/knowledge/` does. Example: `rg "@supabase/supabase-js" app` should print no matches.
+4. **Azure stub**: With `KNOWLEDGE_PROVIDER=azure`, call the health endpoint after signing in (or temporarily invoke `getKnowledgeProvider()` in a one-off script); the provider throws the exact stub message from the spec.
 
 ## Reference repo
 
