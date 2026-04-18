@@ -44,7 +44,7 @@ Details: [docs/NEXTJS-DEV-BUILD-SETUP.md](docs/NEXTJS-DEV-BUILD-SETUP.md).
 
 Copy `.env.example` to `.env.local` and fill values. For local builds without a real Entra app registration, placeholders are acceptable (see [specs/features/SEI-50-auth-knowledge-provider.md](specs/features/SEI-50-auth-knowledge-provider.md)):
 
-- `AUTH_SECRET`, `AUTH_URL`
+- `AUTH_SECRET` (required in production; local `npm run dev` uses a non-production fallback if unset), `AUTH_URL`
 - `AZURE_AD_CLIENT_ID`, `AZURE_AD_TENANT_ID`, `AZURE_AD_CLIENT_SECRET` (placeholders until Antonio / Katie provide real app registration)
 - `KNOWLEDGE_PROVIDER` (`supabase` default, or `azure` for the throwing stub)
 - Supabase URL and keys when using `KNOWLEDGE_PROVIDER=supabase`
