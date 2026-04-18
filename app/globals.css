@@ -2,25 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes waveform {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.8);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  :root {
+    --font-heading: "Inter", system-ui, sans-serif;
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+
+  body {
+    @apply bg-plum-dark text-white antialiased;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-glass border border-white/20 rounded-[32px] shadow-glass;
+  }
+
+  .glass-card:hover {
+    @apply bg-white/[0.12] border-white/30;
+    transition: all 300ms ease;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-primary text-white px-10 py-4 rounded-xl font-semibold shadow-glow;
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  .btn-primary:hover {
+    @apply scale-[1.02];
+    box-shadow: 0 6px 24px rgba(232, 72, 85, 0.5);
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border-2 border-white/30 text-white px-10 py-4 rounded-xl font-semibold;
+    transition: border-color 200ms ease;
+  }
+
+  .btn-secondary:hover {
+    @apply border-white/50;
+  }
+
+  .text-link {
+    @apply text-white/80 hover:text-white transition-colors;
+  }
+
+  .bg-textured-gradient {
+    background:
+      radial-gradient(
+        circle at center,
+        rgba(232, 72, 85, 0.15) 0%,
+        rgba(155, 89, 182, 0.15) 100%
+      ),
+      #2d1b3d;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
 }
 
 @layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
