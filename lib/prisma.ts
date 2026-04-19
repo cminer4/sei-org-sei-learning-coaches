@@ -1,10 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 
+/** Valid placeholder so Prisma can initialize during `next build` when DATABASE_URL is unset (CI). Runtime uses real URL from env. */
+const datasourceUrl =
+  process.env.DATABASE_URL ?? "postgresql://localhost:5432/sei_learning_coaches_build_placeholder";
+
 const prismaClientSingleton = () => {
   return new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: datasourceUrl,
       },
     },
   });
