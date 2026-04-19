@@ -11,6 +11,7 @@
     "build:clean": "rm -rf .next && next build",
     "verify:build": "next build",
     "ensure:build": "prisma generate && next lint && next build",
+    "pr:readiness": "bash scripts/pr-readiness.sh",
     "start": "next start",
     "lint": "next lint"
   },

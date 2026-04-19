@@ -18,6 +18,7 @@
 | `npm run build:clean` | Remove `.next` then build (fixes stale cache issues) |
 | `npm run verify:build` | Same as `build` |
 | `npm run ensure:build` | Lint then build |
+| `npm run pr:readiness` | SEI-53: `ensure:build` + tests + architecture grep (see [README](README.md) PR readiness checklist) |
 
 ## Docs
 

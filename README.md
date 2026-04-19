@@ -23,6 +23,72 @@ AzureKnowledgeProvider (lib/knowledge/azure-provider.ts) is already stubbed in t
 
 The app includes a custom admin surface (Knowledge Base, Prompt Control, Test Console, System Health). This is a Supabase-backed interface built for the dev environment and is included so the sei-org team can see how knowledge base and prompt management works in practice. In the Azure environment, treat it as either: (a) a pattern to replicate on top of the Azure data layer, or (b) an optional cut if a separate admin solution is planned. Removing the admin surface has no effect on the learner-facing application.
 
+## Deployment and Azure
+
+**Base URL (`AUTH_URL`)**: Set to the full public HTTPS origin of the deployed app. Auth.js v5 reads **`AUTH_URL`** (some older docs use the name `NEXTAUTH_URL` for the same idea). Examples:
+
+- Local: `http://localhost:3000`
+- Azure App Service (illustrative): `https://sei-learning-coaches.azurewebsites.net`
+
+The value must match where users load the app. **Entra (Azure AD)**: the app registration must list the matching redirect URI for sign-in. **PR action item for Antonio**: add the production `AUTH_URL` origin to the app registration redirect URIs when the Azure hostname is finalized.
+
+**Knowledge layer**: Same swap as in [Note for PR Reviewers](#note-for-pr-reviewers): `KNOWLEDGE_PROVIDER=supabase` today; `KNOWLEDGE_PROVIDER=azure` when `AzureKnowledgeProvider` is implemented against the SEI Azure data source.
+
+**ElevenLabs Custom LLM**: Configure the Custom LLM endpoint in the ElevenLabs dashboard to:
+
+`https://<your-deployment-host>/api/voice-llm/chat/completions`
+
+Example for Azure App Service: `https://sei-learning-coaches.azurewebsites.net/api/voice-llm/chat/completions`
+
+This route validates **`Authorization: Bearer <INTERVIEW_COACH_CUSTOM_LLM_API_KEY>`** (server secret). It does **not** use the signed-in user session (`auth()`). Set the same secret in your deployment env as in ElevenLabs.
+
+**Open dependencies (owners)**: See the **Open Dependencies** table in [bootstrap-summary.md](bootstrap-summary.md). Do not duplicate owners here; that file stays the source of truth.
+
+### Pull request description (sei-org)
+
+Use this checklist in the PR body. Link **Open Dependencies** to [bootstrap-summary.md](bootstrap-summary.md) instead of pasting the table.
+
+- **Action item (Antonio)**: Register the production **`AUTH_URL`** origin (full HTTPS base, no path) as a valid **redirect URI** in the Entra app registration when the Azure hostname is known.
+- **Docs**: Point reviewers to this README section and `.env.example` for env parity.
+
+## PR readiness checklist
+
+Run before opening or merging a PR to sei-org.
+
+**Automated (no running server)**
+
+```bash
+npm run pr:readiness
+```
+
+This runs `npm run ensure:build`, `npm test`, and confirms `app/` does not import `@supabase/supabase-js` for knowledge (boundary from SEI-50).
+
+**Manual (requires `npm run dev` on localhost:3000)**
+
+With the dev server running, unauthenticated API calls must not execute protected logic:
+
+1. **Session-protected routes** (expect **401**, no cookie):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/guide/knowledge/health
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/onboarding/session
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/assessment-summary
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/elevenlabs-signed-url
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/admin/agents
+```
+
+Each line should print `401`.
+
+2. **Custom LLM** (expect **401** without Bearer; middleware does not apply; route enforces the secret). Set `INTERVIEW_COACH_CUSTOM_LLM_API_KEY` in `.env.local` first; if it is unset, this route returns **500** instead of **401**.
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/api/voice-llm/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"test"}]}'
+```
+
+3. **Knowledge provider stub** (optional): With `KNOWLEDGE_PROVIDER=azure`, exercise the health endpoint after sign-in per SEI-50, or expect the documented stub error from the provider.
+
 ## Project structure
 
 ```
@@ -59,21 +125,9 @@ Details: [docs/NEXTJS-DEV-BUILD-SETUP.md](docs/NEXTJS-DEV-BUILD-SETUP.md).
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and fill values. For local builds without a real Entra app registration, placeholders are acceptable (see [specs/features/SEI-50-auth-knowledge-provider.md](specs/features/SEI-50-auth-knowledge-provider.md)):
+Copy [`.env.example`](.env.example) to `.env.local` and fill values. Comments in `.env.example` list every variable used by the app and whether it is required in production. For local builds without a real Entra app registration, placeholders are acceptable (see [specs/features/SEI-50-auth-knowledge-provider.md](specs/features/SEI-50-auth-knowledge-provider.md)).
 
-- `AUTH_SECRET` (required in production; local `npm run dev` uses a non-production fallback if unset), `AUTH_URL`
-- `AZURE_AD_CLIENT_ID`, `AZURE_AD_TENANT_ID`, `AZURE_AD_CLIENT_SECRET` (placeholders until Antonio / Katie provide real app registration)
-- `KNOWLEDGE_PROVIDER` (`supabase` default, or `azure` for the throwing stub)
-- Supabase URL and keys when using `KNOWLEDGE_PROVIDER=supabase`
-
-When the Assessment flows are ported, you will also need variables such as `ASSESSMENT_COACH_ID` and `ELEVENLABS_ASSESSMENT_AGENT_ID`.
-
-### SEI-50 manual verification (no automated test suite)
-
-1. `npm run ensure:build` passes.
-2. **401**: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/guide/knowledge/health` should return `401` when you are not signed in (start `npm run dev` first).
-3. **Grep**: `app/` must not import `@supabase/supabase-js` for knowledge; only `lib/knowledge/` does. Example: `rg "@supabase/supabase-js" app` should print no matches.
-4. **Azure stub**: With `KNOWLEDGE_PROVIDER=azure`, call the health endpoint after signing in (or temporarily invoke `getKnowledgeProvider()` in a one-off script); the provider throws the exact stub message from the spec.
+See [Deployment and Azure](#deployment-and-azure) for `AUTH_URL` and [PR readiness checklist](#pr-readiness-checklist) for verify steps.
 
 ## Reference repo
 
