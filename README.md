@@ -48,6 +48,8 @@ This route validates **`Authorization: Bearer <INTERVIEW_COACH_CUSTOM_LLM_API_KE
 
 Use this checklist in the PR body. Link **Open Dependencies** to [bootstrap-summary.md](bootstrap-summary.md) instead of pasting the table.
 
+**Note**: Commit `95d83d8` adds the SEI-52 code review doc under `specs/`; included here for completeness, not SEI-53 scope.
+
 - **Action item (Antonio)**: Register the production **`AUTH_URL`** origin (full HTTPS base, no path) as a valid **redirect URI** in the Entra app registration when the Azure hostname is known.
 - **Docs**: Point reviewers to this README section and `.env.example` for env parity.
 

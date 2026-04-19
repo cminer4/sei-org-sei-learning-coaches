@@ -15,7 +15,7 @@ npm test
 
 echo ""
 echo "== 3. grep: app/ must not import @supabase/supabase-js for knowledge =="
-if rg -q "@supabase/supabase-js" app/ 2>/dev/null; then
+if grep -rq "@supabase/supabase-js" app/ 2>/dev/null; then
   echo "FAIL: found @supabase/supabase-js under app/. Knowledge access must go through lib/knowledge/."
   exit 1
 fi
