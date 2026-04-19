@@ -39,48 +39,6 @@ function getSupabase(): SupabaseClient {
   return createClient(url, key);
 }
 
-export async function getActiveSpinCoachPromptAndAgentId(): Promise<{
-  prompt: string;
-  agentId: string;
-}> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("agents")
-    .select("prompt, agent_id")
-    .eq("name", "SPIN Sales Coach")
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  const prompt = data?.prompt;
-  const agentId = data?.agent_id;
-  if (!agentId || typeof agentId !== "string") {
-    throw new Error(
-      'No active SPIN Sales Coach agent found. Set an agent with name "SPIN Sales Coach" to active in Prompt Control.',
-    );
-  }
-  if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-    throw new Error(
-      'No active SPIN Sales Coach agent found. Set an agent with name "SPIN Sales Coach" to active in Prompt Control.',
-    );
-  }
-  return { prompt: prompt.trim(), agentId };
-}
-
-export async function getActiveSpinCoachAgentId(): Promise<string> {
-  const { agentId } = await getActiveSpinCoachPromptAndAgentId();
-  return agentId;
-}
-
-export async function getActiveSpinCoachPrompt(): Promise<string | null> {
-  try {
-    const { prompt } = await getActiveSpinCoachPromptAndAgentId();
-    return prompt;
-  } catch {
-    return null;
-  }
-}
-
 export async function listAgents(): Promise<Agent[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
